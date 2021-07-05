@@ -1,17 +1,7 @@
-Sharing and maintaining lambdas
- - Maybe explore XML
- - below link can read txt from raw github files 
- https://www.devhut.net/2013/09/20/vba-read-a-file-from-a-webserver-or-internet-website/
- - Sheets in excel lambda creator file have cells containing lambdas, lambda categories and comments for name manager
+Create category functionality within the lambdas (most probably have to store in the comments)
+
  - Lambdas can be refreshed in target sheet with spreadsheetBI, maybe with a listbox of lambda selections so that all lambdas do not clutter up spreadsheet
- - Delimitting between comments and lambda is difficult - can I store a table in a readme somehow?  --> can I store in HTML table format in github
-    https://www.w3schools.com/html/html_tables.asp
-    Cants seem to get power query to link to table stored in github
     
  - Maybe create an add-in with a combined roll of generator of table as well as refresher of defined names
 
-
-
-https://stackoverflow.com/questions/8446218/how-to-see-an-html-page-on-github-as-a-normal-rendered-html-page-to-see-preview
-
-
+ - Need to complete Function IsValidRepo
