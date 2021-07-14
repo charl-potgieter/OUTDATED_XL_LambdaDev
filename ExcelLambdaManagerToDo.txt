@@ -1,3 +1,8 @@
+Test git update
+
+I am tempted to bring in the list storage class into the project
+ - store the repos in a listStorage class object
+
 Create category functionality within the lambdas (most probably have to store in the comments)
 
  - Lambdas can be refreshed in target sheet with spreadsheetBI, maybe with a listbox of lambda selections so that all lambdas do not clutter up spreadsheet
@@ -5,3 +10,8 @@ Create category functionality within the lambdas (most probably have to store in
  - Maybe create an add-in with a combined roll of generator of table as well as refresher of defined names
 
  - Need to complete Function IsValidRepo
+
+  - Can I use visual code for editing formulas (and launch from excel)
+  
+  How hard would it be to create Excel formula language support in Visual Studio code
+ * Additioal complexity would be difficulty in gettign defined tames and tables columns to autocomplete
