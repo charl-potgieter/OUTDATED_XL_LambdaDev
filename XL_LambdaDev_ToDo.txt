@@ -1,0 +1,27 @@
+May need to move some of the XML list related functionality in the Lambda Manager into the ListStorage in standard VBA code library
+
+Replace Outdated repos with standard code libraries
+
+Maybe request target path for lambda exports
+ - and remember previous choice
+ - notify of file overwrite
+
+Instead of adding the Lambda repos to active workbook add them to the addin workbook so they can be imported into any workbook - how can they be identified and be refreshed?
+
+I am tempted to bring in the list storage class into the project
+ - store the repos in a listStorage class object
+
+Create category functionality within the lambdas (most probably have to store in the comments)
+
+ - Lambdas can be refreshed in target sheet with spreadsheetBI, maybe with a listbox of lambda selections so that all lambdas do not clutter up spreadsheet
+    
+ - Maybe create an add-in with a combined roll of generator of table as well as refresher of defined names
+
+ - Need to complete Function IsValidRepo
+
+ Create a XL LambdaDev tab on ribbon
+
+  How hard would it be to create Excel formula language support in Visual Studio code
+ * Additioal complexity would be difficulty in gettign defined tames and tables columns to autocomplete
+
+ 
