@@ -23,5 +23,3 @@ Create category functionality within the lambdas (most probably have to store in
 
   How hard would it be to create Excel formula language support in Visual Studio code
  * Additioal complexity would be difficulty in gettign defined tames and tables columns to autocomplete
-
- 
