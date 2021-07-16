@@ -23,14 +23,15 @@ Sub ExportLambaFunctionsFromActiveWorkbookToXml()
     
     Set LambdaStorage = CreateLambdaXmlListStorage(wkb, cXmlMapName)
     
-'    ReadLambdaFormulasInWorkbook wkb, Lambdas
-'    PopulateLambdaInventoryList LambdaInventoryList, Lambdas()
-'
-'    sXmlFileExportPath = wkb.Path & Application.PathSeparator & "LambdaFunctions.xml"
-'    WriteXmlFile wkb, cXmlMapName, sXmlFileExportPath
-'
-'    sHumanReadableInventoryFilePath = wkb.Path & Application.PathSeparator & "LambdaFunctions.txt"
-'    WriteHumanReadableLambdaInventory Lambdas, sHumanReadableInventoryFilePath
+    ReadLambdaFormulasInWorkbook wkb, Lambdas
+    PopulateLambdaInventoryStorage LambdaStorage, Lambdas()
+
+    sXmlFileExportPath = wkb.Path & Application.PathSeparator & "LambdaFunctions.xml"
+    WriteXmlFile wkb, cXmlMapName, sXmlFileExportPath
+
+    sHumanReadableInventoryFilePath = wkb.Path & Application.PathSeparator & "LambdaFunctions.txt"
+    WriteHumanReadableLambdaInventory Lambdas, sHumanReadableInventoryFilePath
+    
     
     LambdaStorage.Delete
     StandardExit
