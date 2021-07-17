@@ -28,11 +28,6 @@ Function CreateLambdaXmlListStorage(ByVal wkb As Workbook, ByVal sXmlMapName As 
 
     'Create ListObject and map to XML
     Set storage = New zLIB_ListStorage
-    If storage.StorageAlreadyExists(wkb, "Lambdas") Then
-        storage.AssignStorage wkb, "Lambdas"
-        storage.Delete
-    End If
-        
     storage.CreateStorage wkb, "Lambdas", Array("RepoName", "LambdaName", "RefersTo", "Comment")
     
     With storage.ListObj
@@ -232,78 +227,16 @@ End Sub
 
 
 
+Function RepoHasAlreadyBeenAdded(ByVal GitStorage As zLIB_ListStorage, ByVal sRepoUrl As String) As Boolean
 
+    Dim ArrayOfReposAlreadyAdded
+    
+    If GitStorage.IsEmpty Then
+        RepoHasAlreadyBeenAdded = False
+    Else
+        ArrayOfReposAlreadyAdded = GitStorage.ItemsInField("RepoUrl")
+        Debug.Print WorksheetFunction.CountIfs(ArrayOfReposAlreadyAdded, 1)
+    End If
 
-'Function AssignReposList(ByVal wkb As Workbook) As ListObject
-'
-'    Dim sht As Worksheet
-'    Dim lo As ListObject
-'    Const csRepoSheetName As String = "__LambdaRepos"
-'    Const csRepoListName As String = "__tbl_Repos"
-'
-'    If SheetExists(wkb, csRepoSheetName) Then
-'        Set AssignReposList = wkb.Sheets(csRepoSheetName).ListObjects(csRepoListName)
-'    Else
-'        Set sht = wkb.Sheets.Add
-'        sht.Name = csRepoSheetName
-'        sht.Range("A1").Value = "RepoName"
-'        sht.Range("B1").Value = "RepoUrl"
-'        Set lo = sht.ListObjects.Add(SourceType:=xlSrcRange, Source:=sht.Range("$A1:$B1"), XlListObjectHasHeaders:=xlYes)
-'        lo.Name = csRepoListName
-'    End If
-'
-'    Set AssignReposList = lo
-'
-'   ' sht.Visible = xlSheetVeryHidden
-'
-'End Function
-'
-'
-'Function GetRepoNameFromUrl(sRepoUrl) As String
-''Repo name defined as last portion of URL path (=filename without extension)
-'
-'    Dim iPositionOfLastForwardSlash As Integer
-'
-'    iPositionOfLastForwardSlash = InStrRev(sRepoUrl, "/")
-'    GetRepoNameFromUrl = Right(sRepoUrl, Len(sRepoUrl) - iPositionOfLastForwardSlash)
-'    GetRepoNameFromUrl = Replace(GetRepoNameFromUrl, ".xml", "")
-'    GetRepoNameFromUrl = Replace(GetRepoNameFromUrl, ".XML", "")
-'    GetRepoNameFromUrl = Replace(GetRepoNameFromUrl, ".Xml", "")
-'
-'End Function
-'
-'
-'Function RepoAlreadyExistsInWorkbook(ByVal loRepos As ListObject, ByVal sRepoUrl As String)
-'
-'    Dim sRepoName As String
-'
-'    sRepoName = GetRepoNameFromUrl(sRepoUrl)
-'
-'    If Not ListHasDataBodyRange(loRepos) Then
-'        RepoAlreadyExistsInWorkbook = False
-'    Else
-'        RepoAlreadyExistsInWorkbook = WorksheetFunction.CountIfs( _
-'            loRepos.ListColumns("RepoName").DataBodyRange, _
-'            sRepoName) <> 0
-'    End If
-'
-'End Function
-'
-'
-'Sub AddLambdaRepoToList(ByVal loRepos As ListObject, ByVal sRepoUrl As String)
-'
-'   AddOneRowToListObject loRepos
-'   loRepos.ListColumns("RepoUrl").DataBodyRange.Cells(loRepos.DataBodyRange.rows.Count) = sRepoUrl
-'
-'End Sub
-'
-'
-'
-'
-'
-'
-'
-'
-'
-'
-'
+End Function
+

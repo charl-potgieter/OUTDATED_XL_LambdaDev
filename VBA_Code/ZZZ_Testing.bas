@@ -6,15 +6,9 @@ Option Private Module
 
 Sub TestArrays()
 
-    Dim Headers As Variant
-    Dim item As Variant
+    Dim v
     
-    Headers = Array("a", "b", "c")
-    
-    For Each item In Headers
-        Debug.Print item
-    Next item
-    
+    v = Selection
 
 
 End Sub

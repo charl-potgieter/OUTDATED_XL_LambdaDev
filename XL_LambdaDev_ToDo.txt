@@ -1,4 +1,6 @@
-Replace Outdated repos with standard code libraries
+I should abstract away the export to xml away into the liststorage class (and remove the listobj method)
+ 
+Update isempty to be able to also refer to the filtered list
 
 Delete the XML mapping after export
 

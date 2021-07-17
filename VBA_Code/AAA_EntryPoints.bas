@@ -43,7 +43,6 @@ End Sub
 
 
 
-
 Sub AddGitRepo()
 
     Dim sRepoUrl As String
@@ -56,16 +55,18 @@ Sub AddGitRepo()
     Set GitRepoStorage = New zLIB_ListStorage
     
     If Not (GitRepoStorage.StorageAlreadyExists(ThisWorkbook, csRepoStorageName)) Then
-        GitRepoStorage.CreateStorage ThisWorkbook, csRepoStorageName, Array("RepoName", "RepoUrl")
+        GitRepoStorage.CreateStorage ThisWorkbook, csRepoStorageName, Array("RepoUrl")
+    Else
+        GitRepoStorage.AssignStorage ThisWorkbook, csRepoStorageName
     End If
+        
 
-'
-'    If RepoAlreadyExistsInWorkbook(loRepos, sRepoUrl) Then
-'        MsgBox ("This repo name already exists in the active workbook")
-'    Else
-'        'AddLambdaRepoToWorkbook wkb, sRepoUrl
-'        MsgBox ("Repo successfully added")
-'    End If
+    If RepoHasAlreadyBeenAdded(GitRepoStorage, sRepoUrl) Then
+        MsgBox ("This repo name has already been added")
+    Else
+        'AddLambdaRepoToWorkbook wkb, sRepoUrl
+        MsgBox ("Repo successfully added")
+    End If
 
 
 End Sub
