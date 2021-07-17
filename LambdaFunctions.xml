@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <LambdaDocument xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<Record>
-		<Name>AppendTwoColumns</Name>
+		<RepoName>TEST_LambdaExamples</RepoName>
+		<LambdaName>AppendTwoColumns</LambdaName>
 		<RefersTo>=LAMBDA(range1,range2,
   LET(
           RowsRng1, ROWS(range1),
@@ -16,7 +17,8 @@
 		<Comment/>
 	</Record>
 	<Record>
-		<Name>StackArray</Name>
+		<RepoName>TEST_LambdaExamples</RepoName>
+		<LambdaName>StackArray</LambdaName>
 		<RefersTo>=LAMBDA(ArrayToStack,
      LET(
            ColCount, COLUMNS(ArrayToStack),
@@ -34,7 +36,8 @@
 		<Comment>This is a comment</Comment>
 	</Record>
 	<Record>
-		<Name>SplitText</Name>
+		<RepoName>TEST_LambdaExamples</RepoName>
+		<LambdaName>SplitText</LambdaName>
 		<RefersTo>=LAMBDA(text,delim,
       TRANSPOSE(
            FILTERXML(

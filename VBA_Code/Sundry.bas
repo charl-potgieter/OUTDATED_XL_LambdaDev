@@ -11,10 +11,10 @@ Function CreateLambdaXmlListStorage(ByVal wkb As Workbook, ByVal sXmlMapName As 
     'Excel needs two elements in map such a below in order to work out the schema
     sMap = "<LambdaDocument> " & vbCrLf & _
             " <Record> " & vbCrLf & _
-            "    <Name></Name><RefersTo></RefersTo><Comment></Comment> " & vbCrLf & _
+            "    <RepoName></RepoName><LambdaName></LambdaName><RefersTo></RefersTo><Comment></Comment> " & vbCrLf & _
             " </Record> " & vbCrLf & _
             " <Record> " & vbCrLf & _
-            "    <Name></Name><RefersTo></RefersTo><Comment></Comment> " & vbCrLf & _
+            "    <RepoName></RepoName><LambdaName></LambdaName><RefersTo></RefersTo><Comment></Comment> " & vbCrLf & _
             " </Record> " & vbCrLf & _
             "</LambdaDocument>"
             
@@ -28,10 +28,16 @@ Function CreateLambdaXmlListStorage(ByVal wkb As Workbook, ByVal sXmlMapName As 
 
     'Create ListObject and map to XML
     Set storage = New zLIB_ListStorage
-    storage.CreateStorage wkb, "Lambdas", Array("Name", "RefersTo", "Comment")
+    If storage.StorageAlreadyExists(wkb, "Lambdas") Then
+        storage.AssignStorage wkb, "Lambdas"
+        storage.Delete
+    End If
+        
+    storage.CreateStorage wkb, "Lambdas", Array("RepoName", "LambdaName", "RefersTo", "Comment")
     
     With storage.ListObj
-        .ListColumns("Name").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/Name"
+        .ListColumns("RepoName").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/RepoName"
+        .ListColumns("LambdaName").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/LambdaName"
         .ListColumns("RefersTo").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/RefersTo"
         .ListColumns("Comment").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/Comment"
         .Range.NumberFormat = "@"
@@ -56,7 +62,13 @@ Sub ReadLambdaFormulasInWorkbook(ByVal wkb As Workbook, ByRef Lambdas() As TypeL
     Dim rngCell As Range
     Dim sht As Worksheet
     Dim i As Long
+    Dim fso As Scripting.FileSystemObject
+    Dim sRepoName As String
     Const iMaxAllowableLambdas As Integer = 10000
+    
+
+    Set fso = New Scripting.FileSystemObject
+    sRepoName = fso.GetBaseName(wkb.Name)
 
     i = 0
     ReDim Lambdas(0 To iMaxAllowableLambdas - 1)
@@ -68,7 +80,9 @@ Sub ReadLambdaFormulasInWorkbook(ByVal wkb As Workbook, ByRef Lambdas() As TypeL
             Set rngWithFormulas = sht.Cells.SpecialCells(xlCellTypeFormulas)
             For Each rngCell In rngWithFormulas
                 If CellContainsLambda(rngCell) Then
-                    LambdaRecord.Name = rngCell.Offset(-1, 0).Value
+                    
+                    LambdaRecord.RepoName = sRepoName
+                    LambdaRecord.LambdaName = rngCell.Offset(-1, 0).Value
                     LambdaRecord.RefersTo = RemoveParametersFromLambda(rngCell.Formula)
 
                     'Capture of comments are optional
@@ -78,6 +92,7 @@ Sub ReadLambdaFormulasInWorkbook(ByVal wkb As Workbook, ByRef Lambdas() As TypeL
 
                     Lambdas(i) = LambdaRecord
                     i = i + 1
+                    
                 End If
             Next rngCell
         End If
@@ -146,7 +161,8 @@ Sub PopulateLambdaInventoryStorage(ByVal LambdaStorage As zLIB_ListStorage, _
     
     For i = LBound(Lambdas) To UBound(Lambdas)
         Set dict = New Dictionary
-        dict.Add "Name", Lambdas(i).Name
+        dict.Add "RepoName", Lambdas(i).RepoName
+        dict.Add "LambdaName", Lambdas(i).LambdaName
         dict.Add "RefersTo", Lambdas(i).RefersTo
         dict.Add "Comment", Lambdas(i).Comment
         LambdaStorage.InsertFromDictionary dict
@@ -201,7 +217,7 @@ Sub WriteHumanReadableLambdaInventory(ByRef Lambdas() As TypeLambdaRecord, _
 
     For i = LBound(Lambdas) To UBound(Lambdas)
         oFile.WriteLine ("/*------------------------------------------------------------------------------------------------------------------")
-        oFile.WriteLine ("      Name: " & Lambdas(i).Name)
+        oFile.WriteLine ("      Name: " & Lambdas(i).LambdaName)
         oFile.WriteLine ("      Comment: " & Lambdas(i).Comment)
         oFile.WriteLine ("------------------------------------------------------------------------------------------------------------------/*")
         oFile.WriteLine (Lambdas(i).RefersTo)

@@ -2,10 +2,13 @@ Attribute VB_Name = "AAA_EntryPoints"
 Option Explicit
 
 Public Type TypeLambdaRecord
-    Name As String
+    RepoName As String
+    LambdaName As String
     RefersTo As String
     Comment As String
 End Type
+
+Public Const csRepoStorageName As String = "GitLambdaStorage"
 
 
 Sub ExportLambaFunctionsFromActiveWorkbookToXml()
@@ -41,17 +44,21 @@ End Sub
 
 
 
-'Sub AddGitRepoToActiveWorkbook()
-'
-'    Dim sRepoUrl As String
-'    Dim wkb As Workbook
-'    Dim sRepoName As String
-'    Dim loRepos As ListObject
-'
-'    sRepoUrl = InputBox("Enter Repo URL")
-'
-'    Set wkb = ActiveWorkbook
-'    Set loRepos = AssignReposList(wkb)
+Sub AddGitRepo()
+
+    Dim sRepoUrl As String
+    Dim sRepoName As String
+    Dim GitRepoStorage As zLIB_ListStorage
+    Dim a As Boolean
+
+    sRepoUrl = InputBox("Enter Repo URL")
+    
+    Set GitRepoStorage = New zLIB_ListStorage
+    
+    If Not (GitRepoStorage.StorageAlreadyExists(ThisWorkbook, csRepoStorageName)) Then
+        GitRepoStorage.CreateStorage ThisWorkbook, csRepoStorageName, Array("RepoName", "RepoUrl")
+    End If
+
 '
 '    If RepoAlreadyExistsInWorkbook(loRepos, sRepoUrl) Then
 '        MsgBox ("This repo name already exists in the active workbook")
@@ -59,6 +66,6 @@ End Sub
 '        'AddLambdaRepoToWorkbook wkb, sRepoUrl
 '        MsgBox ("Repo successfully added")
 '    End If
-'
-'
-'End Sub
+
+
+End Sub
