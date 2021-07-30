@@ -26,3 +26,9 @@ Create category functionality within the lambdas (most probably have to store in
  * Additioal complexity would be difficulty in gettign defined tames and tables columns to autocomplete
 
  How do I ensure that user incudes a reference - maybe create a test before running at each entry point
+
+ When will I receive below update with the new Lambda functions and improvements?
+ https://techcommunity.microsoft.com/t5/excel-blog/announcing-lambda-helper-functions-lambdas-as-arguments-and-more/ba-p/2576648
+
+ Look at combining lambdas and cubesets
+ https://blog.crossjoin.co.uk/2021/07/28/excel-cube-functions-dynamic-arrays-and-lambdas-part-1-getting-all-the-items-from-a-set/
