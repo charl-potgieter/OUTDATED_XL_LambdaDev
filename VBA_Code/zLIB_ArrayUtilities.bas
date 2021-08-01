@@ -2,6 +2,7 @@ Attribute VB_Name = "zLIB_ArrayUtilities"
 Option Explicit
 Option Compare Text
 
+
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 '       This module is a copy of that per cpearson.com website - details below
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -3826,5 +3827,4 @@ End If
 
 
 End Function
-
 
