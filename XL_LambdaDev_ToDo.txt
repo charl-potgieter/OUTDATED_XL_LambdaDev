@@ -1,14 +1,19 @@
-I should abstract away the export to xml away into the liststorage class (and remove the listobj method)
- 
-Update isempty to be able to also refer to the filtered list
+Maybe move the creation of the lambda XML into XL_Developer and retain the reading in this add in --> Problem is that this moves too much of the standard lib code into XL Developer and I am trying to keep this add in as minimal as possible.
 
-Delete the XML mapping after export
+Create a more structured spreadsheet format for lambda creation containing fields for category, name, formula
+ - Storage has been created
+ - Add the xml mapping next
+ - Add a comment to Category Field on lambda storage to explain the data validation
+ 
+VBA library Update isempty to be able to also refer to the filtered list?
 
 Whem saving lamdbas to XML add an extra field for repo name = workbook name
 
 Maybe request target path for lambda exports
  * and remember previous choice
  * notify of file overwrite
+
+Consider renaming as FunctionMaker
 
 Instead of adding the Lambda repos to active workbook add them to the addin workbook so they can be imported into any workbook - how can they be identified and be refreshed?
 
@@ -19,6 +24,8 @@ Create category functionality within the lambdas (most probably have to store in
  - Maybe create an add-in with a combined roll of generator of table as well as refresher of defined names
 
  - Need to complete Function IsValidRepo
+
+
 
  Create a XL LambdaDev tab on ribbon
 
