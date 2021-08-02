@@ -5,6 +5,7 @@ Option Private Module
 
 Sub FormatCategoryStorageSheet(ByVal CategoryStorage As zLIB_ListStorage)
     
+    CategoryStorage.AddBlankRow
     CategoryStorage.ListObj.ListColumns("Categories").Range.ColumnWidth = 50
     
 End Sub
@@ -12,9 +13,11 @@ End Sub
 
 Sub FormatLambdaStorageSheet(ByVal LambdaStorage As zLIB_ListStorage)
 
+    Dim wkb As Workbook
 
+    LambdaStorage.AddBlankRow
+    
     With LambdaStorage.ListObj
-        .ListColumns("RepoName").Range.ColumnWidth = 25
         .ListColumns("Name").Range.ColumnWidth = 25
         .ListColumns("RefersTo").Range.ColumnWidth = 90
         .ListColumns("Category").Range.ColumnWidth = 25
@@ -25,28 +28,28 @@ Sub FormatLambdaStorageSheet(ByVal LambdaStorage As zLIB_ListStorage)
         .DataBodyRange.VerticalAlignment = xlTop
         .DataBodyRange.WrapText = True
     End With
-
     
-    'Add Comment re auto populating repo name
-    With Range("tbl_LambdaStorage[[#Headers],[RepoName]]")
+    
+    'Add Comment re Category data validation
+    With Range("tbl_LambdaStorage[[#Headers],[Category]]")
         .AddComment
         .Comment.Visible = True
         .Comment.Text Text:= _
-            "This column will autopopulate with workbook name when XML file is generated.  " & _
-            "Any content manually captured in the column will be overwritten."
-        .Comment.Shape.Left = 200
+            "Drop down data validation is based on categories as captured " & _
+            "in the second tab of this workbook."
+        .Comment.Shape.Left = 500
         .Comment.Shape.Top = 20
         .Comment.Shape.Width = 200
         .Comment.Shape.Height = 50
-    
     End With
     
-'    Selection.ShapeRange.IncrementLeft 286#
-'    Selection.ShapeRange.IncrementTop -69.5
-'    Selection.ShapeRange.ScaleWidth 2.95, msoFalse, msoScaleFromTopLeft
-'    Range("tbl_LambdaStorage[[#Headers],[RepoName]]").Comment.Shape.Select True
-
     
+    'Add validation to categories field on LambaStorage
+    Set wkb = LambdaStorage.ListObj.Parent.Parent
+    
+    wkb.Names.Add Name:="Val_Categories", RefersToR1C1:="=tbl_CategoryStorage[Categories]"
+    LambdaStorage.ListObj.ListColumns("Category").DataBodyRange.Validation.Add _
+        Type:=xlValidateList, Formula1:="=Val_Categories", AlertStyle:=xlValidAlertStop
     
 End Sub
 
@@ -60,10 +63,10 @@ Function CreateLambdaXmlMap(ByVal wkb As Workbook, ByVal sXmlMapName As String) 
     'Excel needs two elements in map such a below in order to work out the schema
     sMap = "<LambdaDocument> " & vbCrLf & _
             " <Record> " & vbCrLf & _
-            "    <RepoName></RepoName><Name></Name><RefersTo></RefersTo><Category></Category><Author></Author><Comment></Comment> " & vbCrLf & _
+            "    <Name></Name><RefersTo></RefersTo><Category></Category><Author></Author><Comment></Comment> " & vbCrLf & _
             " </Record> " & vbCrLf & _
             " <Record> " & vbCrLf & _
-            "    <RepoName></RepoName><Name></Name><RefersTo></RefersTo><Comment></Comment> " & vbCrLf & _
+            "    <Name></Name><RefersTo></RefersTo><Comment></Comment> " & vbCrLf & _
             " </Record> " & vbCrLf & _
             "</LambdaDocument>"
 
@@ -82,7 +85,6 @@ End Function
 Sub AssignXmlMapToStorage(ByVal LambdaStorage As zLIB_ListStorage, ByVal LambdaXmlMap As XmlMap)
 
     With LambdaStorage.ListObj
-        .ListColumns("RepoName").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/RepoName"
         .ListColumns("Name").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/Name"
         .ListColumns("RefersTo").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/RefersTo"
         .ListColumns("Category").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/Category"
@@ -93,6 +95,57 @@ Sub AssignXmlMapToStorage(ByVal LambdaStorage As zLIB_ListStorage, ByVal LambdaX
 
 End Sub
 
+
+
+Function WorkbookIsValidForLambdaXmlExport(ByVal wkb As Workbook) As Boolean
+
+    WorkbookIsValidForLambdaXmlExport = True
+    
+    On Error Resume Next
+    If Err.Number <> 0 Then
+        MsgBox ("This workbook is not in the correct format to export lambda functions")
+        WorkbookIsValidForLambdaXmlExport = False
+    End If
+    On Error GoTo 0
+    
+    If wkb.Path = "" Then
+        MsgBox ("Workbook needs to be saved before generation of output")
+        WorkbookIsValidForLambdaXmlExport = False
+    End If
+    
+
+End Function
+
+
+Sub WriteHumanReadableLambdaInventory(ByRef LambdasStorage As zLIB_ListStorage, _
+    ByVal sFilePath As String)
+'Requires reference to Microsoft Scripting Runtime
+'Writes sStr to a text file
+'*** THIS WILL OVERWRITE ANY CURRENT CONTENT OF THE FILE ***
+
+    Dim fso As Object
+    Dim oFile As Object
+    Dim i As Long
+
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    Set oFile = fso.CreateTextFile(sFilePath)
+
+    For i = 1 To LambdasStorage.NumberOfRecords
+        oFile.WriteLine ("/*------------------------------------------------------------------------------------------------------------------")
+        oFile.WriteLine ("      Formula Name:   " & LambdasStorage.FieldItemByIndex("Name", i))
+        oFile.WriteLine ("      Category:       " & LambdasStorage.FieldItemByIndex("Category", i))
+        oFile.WriteLine ("      Autohor:        " & LambdasStorage.FieldItemByIndex("Author", i))
+        oFile.WriteLine ("      Comment:        " & LambdasStorage.FieldItemByIndex("Comment", i))
+        oFile.WriteLine ("------------------------------------------------------------------------------------------------------------------/*")
+        oFile.WriteLine (LambdasStorage.FieldItemByIndex("RefersTo", i))
+        oFile.WriteLine (vbCrLf)
+    Next i
+
+    oFile.Close
+    Set fso = Nothing
+    Set oFile = Nothing
+
+End Sub
 
 
 'Function CreateLambdaXmlListStorage(ByVal wkb As Workbook, ByVal sXmlMapName As String) As zLIB_ListStorage
@@ -290,35 +343,9 @@ End Sub
 '
 '
 '
-'Sub WriteHumanReadableLambdaInventory(ByRef Lambdas() As TypeLambdaRecord, _
-'    ByVal sFilePath As String)
-''Requires reference to Microsoft Scripting Runtime
-''Writes sStr to a text file
-''*** THIS WILL OVERWRITE ANY CURRENT CONTENT OF THE FILE ***
-'
-'    Dim fso As Object
-'    Dim oFile As Object
-'    Dim i As Long
-'
-'    Set fso = CreateObject("Scripting.FileSystemObject")
-'    Set oFile = fso.CreateTextFile(sFilePath)
-'
-'    For i = LBound(Lambdas) To UBound(Lambdas)
-'        oFile.WriteLine ("/*------------------------------------------------------------------------------------------------------------------")
-'        oFile.WriteLine ("      Name: " & Lambdas(i).LambdaName)
-'        oFile.WriteLine ("      Comment: " & Lambdas(i).Comment)
-'        oFile.WriteLine ("------------------------------------------------------------------------------------------------------------------/*")
-'        oFile.WriteLine (Lambdas(i).RefersTo)
-'        oFile.WriteLine (vbCrLf)
-'    Next i
-'
-'    oFile.Close
-'    Set fso = Nothing
-'    Set oFile = Nothing
-'
-'End Sub
-'
-'
+
+
+
 '
 'Function RepoHasAlreadyBeenAdded(ByVal GitStorage As zLIB_ListStorage, ByVal sRepoUrl As String) As Boolean
 '

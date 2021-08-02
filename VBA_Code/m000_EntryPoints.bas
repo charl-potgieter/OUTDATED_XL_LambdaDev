@@ -1,15 +1,5 @@
-Attribute VB_Name = "AAA_EntryPoints"
+Attribute VB_Name = "m000_EntryPoints"
 Option Explicit
-
-Public Type TypeLambdaRecord
-    RepoName As String
-    LambdaName As String
-    RefersTo As String
-    Category As String
-    Comment As String
-End Type
-
-
 
 
 Public Sub CreateLambdaXmlGeneratorWorkbook()
@@ -30,7 +20,7 @@ Public Sub CreateLambdaXmlGeneratorWorkbook()
     StandardEntry
     Set wkb = Workbooks.Add
     LambdaStorage.CreateStorage wkb, csLambdaStorageName, _
-        Array("RepoName", "Name", "RefersTo", "Category", "Author", "Comment")
+        Array("Name", "RefersTo", "Category", "Author", "Comment")
     CategoryStorage.CreateStorage wkb, csCategoryStorageName, Array("Categories")
     
     'Delete sheets other than above storage
@@ -39,12 +29,6 @@ Public Sub CreateLambdaXmlGeneratorWorkbook()
             sht.Delete
         End If
     Next sht
-    
-    'Add validation to categories field on LambaStorage
-    LambdaStorage.AddBlankRow
-    wkb.Names.Add Name:="Val_Categories", RefersToR1C1:="=tbl_CategoryStorage[Categories]"
-    LambdaStorage.ListObj.ListColumns("Category").DataBodyRange.Validation.Add _
-        Type:=xlValidateList, Formula1:="=Val_Categories"
 
     FormatLambdaStorageSheet LambdaStorage
     FormatCategoryStorageSheet CategoryStorage
@@ -60,38 +44,38 @@ End Sub
 
 
 
+Sub ExportLambaFunctionsFromActiveWorkbookToXml()
 
-'Sub ExportLambaFunctionsFromActiveWorkbookToXml()
-'
-'    Dim shtLambdaInventory As Worksheet
-'    Dim LambdaStorage As zLIB_ListStorage
-'    Dim Lambdas() As TypeLambdaRecord
-'    Dim sXmlFileExportPath As String
-'    Dim sHumanReadableInventoryFilePath As String
-'    Dim wkb As Workbook
-'    Const cXmlMapName As String = "LambdaMap"
-'
-'    StandardEntry
-'    Set wkb = ActiveWorkbook
-'
-'    Set LambdaStorage = CreateLambdaXmlListStorage(wkb, cXmlMapName)
-'
-'    ReadLambdaFormulasInWorkbook wkb, Lambdas
-'    PopulateLambdaInventoryStorage LambdaStorage, Lambdas()
-'
-'    sXmlFileExportPath = wkb.Path & Application.PathSeparator & "LambdaFunctions.xml"
-'    WriteXmlFile wkb, cXmlMapName, sXmlFileExportPath
-'
-'    sHumanReadableInventoryFilePath = wkb.Path & Application.PathSeparator & "LambdaFunctions.txt"
-'    WriteHumanReadableLambdaInventory Lambdas, sHumanReadableInventoryFilePath
-'
-'
-'    LambdaStorage.Delete
-'    StandardExit
-'
-'End Sub
-'
-'
+    Dim shtLambdaInventory As Worksheet
+    Dim LambdaStorage As zLIB_ListStorage
+    Dim sXmlFileExportPath As String
+    Dim sHumanReadableInventoryFilePath As String
+    Dim wkb As Workbook
+    Dim sExportPath As String
+    Const csXmlMapName As String = "LambdaMap"
+
+    StandardEntry
+    Set wkb = ActiveWorkbook
+
+    If Not WorkbookIsValidForLambdaXmlExport(wkb) Then
+        Exit Sub
+    End If
+    
+    sExportPath = wkb.Path & Application.PathSeparator & "PowerFunctionExports"
+    If Not FolderExists(sExportPath) Then CreateFolder (sExportPath)
+    sXmlFileExportPath = sExportPath & Application.PathSeparator & "LambdaFunctions.xml"
+    wkb.XmlMaps(csXmlMapName).Export Url:=sXmlFileExportPath, OverWrite:=True
+
+    Set LambdaStorage = New zLIB_ListStorage
+    LambdaStorage.AssignStorage wkb, "LambdaStorage"
+    sHumanReadableInventoryFilePath = sExportPath & Application.PathSeparator & "LambdaFunctions.txt"
+    WriteHumanReadableLambdaInventory LambdaStorage, sHumanReadableInventoryFilePath
+
+    StandardExit
+
+End Sub
+
+
 '
 'Sub AddGitRepo()
 '
