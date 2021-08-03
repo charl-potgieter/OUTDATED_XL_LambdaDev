@@ -1,6 +1,10 @@
 Attribute VB_Name = "m000_EntryPoints"
 Option Explicit
 
+Public Const csRepoStorageName = "GitRepos"
+Public Const csFunctionStorageName = "PowerFunctions"
+Const csLambdaXmlMapName As String = "LambdaMap"
+
 
 Public Sub CreateLambdaXmlGeneratorWorkbook()
 
@@ -11,7 +15,7 @@ Public Sub CreateLambdaXmlGeneratorWorkbook()
     Dim LambdaXmlMap As XmlMap
     Const csCategoryStorageName As String = "CategoryStorage"
     Const csLambdaStorageName As String = "LambdaStorage"
-    Const csLambdaXmlMapName As String = "LambdaMap"
+    
     
     
     Set LambdaStorage = New zLIB_ListStorage
@@ -64,43 +68,93 @@ Sub ExportLambaFunctionsFromActiveWorkbookToXml()
     sExportPath = wkb.Path & Application.PathSeparator & "PowerFunctionExports"
     If Not FolderExists(sExportPath) Then CreateFolder (sExportPath)
     sXmlFileExportPath = sExportPath & Application.PathSeparator & "LambdaFunctions.xml"
-    wkb.XmlMaps(csXmlMapName).Export Url:=sXmlFileExportPath, OverWrite:=True
+    wkb.XmlMaps(csXmlMapName).Export Url:=sXmlFileExportPath, Overwrite:=True
 
     Set LambdaStorage = New zLIB_ListStorage
     LambdaStorage.AssignStorage wkb, "LambdaStorage"
     sHumanReadableInventoryFilePath = sExportPath & Application.PathSeparator & "LambdaFunctions.txt"
     WriteHumanReadableLambdaInventory LambdaStorage, sHumanReadableInventoryFilePath
 
+    MsgBox ("Functions exported")
+
     StandardExit
 
 End Sub
 
 
-'
-'Sub AddGitRepo()
-'
-'    Dim sRepoUrl As String
-'    Dim sRepoName As String
-'    Dim GitRepoStorage As zLIB_ListStorage
-'    Dim a As Boolean
-'
-'    sRepoUrl = InputBox("Enter Repo URL")
-'
-'    Set GitRepoStorage = New zLIB_ListStorage
-'
-'    If Not (GitRepoStorage.StorageAlreadyExists(ThisWorkbook, csRepoStorageName)) Then
-'        GitRepoStorage.CreateStorage ThisWorkbook, csRepoStorageName, Array("RepoUrl")
-'    Else
-'        GitRepoStorage.AssignStorage ThisWorkbook, csRepoStorageName
-'    End If
-'
-'
-'    If RepoHasAlreadyBeenAdded(GitRepoStorage, sRepoUrl) Then
-'        MsgBox ("This repo name has already been added")
-'    Else
-'        'AddLambdaRepoToWorkbook wkb, sRepoUrl
-'        MsgBox ("Repo successfully added")
-'    End If
-'
-'
-'End Sub
+
+Sub AddGitRepoToActiveWorkbook()
+
+    Dim sRepoUrl As String
+    Dim sRepoName As String
+    Dim GitRepoStorage As zLIB_ListStorage
+    Dim RepoUrlDictionary As Dictionary
+    Dim wkb As Workbook
+
+    Set wkb = ActiveWorkbook
+    sRepoUrl = InputBox("Enter Repo URL")
+    If sRepoUrl = "" Then Exit Sub
+
+    Set GitRepoStorage = New zLIB_ListStorage
+    
+
+    If Not (GitRepoStorage.StorageAlreadyExists(wkb, csRepoStorageName)) Then
+        GitRepoStorage.CreateStorage wkb, csRepoStorageName, Array("RepoUrl")
+    Else
+        GitRepoStorage.AssignStorage wkb, csRepoStorageName
+    End If
+
+    If RepoHasAlreadyBeenAdded(GitRepoStorage, sRepoUrl) Then
+        MsgBox ("This repo URL has previously been captured.  Current action ignored.")
+    Else
+        Set RepoUrlDictionary = New Dictionary
+        RepoUrlDictionary.Add key:="RepoURL", item:=sRepoUrl
+        GitRepoStorage.InsertFromDictionary RepoUrlDictionary
+        MsgBox ("Repo successfully added")
+    End If
+
+End Sub
+
+
+
+Sub RefreshAvailableFormulas()
+
+    Dim wkb As Workbook
+    Dim FormulaStorage As zLIB_ListStorage
+    Dim GitRepoStorage As zLIB_ListStorage
+    Dim sRepoUrl As String
+    Dim LambdaXmlMap As XmlMap
+    Dim i As Integer
+
+    StandardEntry
+    Set wkb = ActiveWorkbook
+
+    Set GitRepoStorage = New zLIB_ListStorage
+    GitRepoStorage.AssignStorage wkb, "GitRepos"
+
+    Set FormulaStorage = New zLIB_ListStorage
+    If Not (FormulaStorage.StorageAlreadyExists(wkb, csFunctionStorageName)) Then
+        FormulaStorage.CreateStorage wkb, csFunctionStorageName, Array("Name", "RefersTo", "Category", "Author", "Comment")
+    Else
+        FormulaStorage.AssignStorage wkb, csFunctionStorageName
+    End If
+
+    On Error Resume Next
+    wkb.XmlMaps(csLambdaXmlMapName).Delete
+    On Error GoTo 0
+    Set LambdaXmlMap = CreateLambdaXmlMap(wkb, csLambdaXmlMapName)
+    AssignXmlMapToStorage FormulaStorage, LambdaXmlMap
+    
+    FormulaStorage.ClearData
+    For i = 1 To GitRepoStorage.NumberOfRecords
+        sRepoUrl = GitRepoStorage.FieldItemByIndex("RepoUrl", i)
+        wkb.XmlMaps("LambdaMap").Import Url:=sRepoUrl, Overwrite:=False
+    Next i
+
+    wkb.XmlMaps(csLambdaXmlMapName).Delete
+    StandardExit
+
+End Sub
+
+
+

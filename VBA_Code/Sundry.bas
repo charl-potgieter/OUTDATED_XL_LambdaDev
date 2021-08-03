@@ -148,6 +148,27 @@ Sub WriteHumanReadableLambdaInventory(ByRef LambdasStorage As zLIB_ListStorage, 
 End Sub
 
 
+
+Function RepoHasAlreadyBeenAdded(ByVal GitStorage As zLIB_ListStorage, ByVal sRepoUrl As String) As Boolean
+
+    Dim ArrayOfReposAlreadyAdded
+    Dim i As Integer
+
+    RepoHasAlreadyBeenAdded = False
+
+    If Not GitStorage.IsEmpty Then
+        ArrayOfReposAlreadyAdded = GitStorage.ItemsInField("RepoUrl")
+        i = LBound(ArrayOfReposAlreadyAdded)
+        Do While i <= UBound(ArrayOfReposAlreadyAdded) And Not RepoHasAlreadyBeenAdded
+            RepoHasAlreadyBeenAdded = (UCase(sRepoUrl) = UCase(ArrayOfReposAlreadyAdded(i)))
+            i = i + 1
+        Loop
+    End If
+
+End Function
+
+
+
 'Function CreateLambdaXmlListStorage(ByVal wkb As Workbook, ByVal sXmlMapName As String) As zLIB_ListStorage
 '
 '    Dim sMap As String
@@ -346,17 +367,4 @@ End Sub
 
 
 
-'
-'Function RepoHasAlreadyBeenAdded(ByVal GitStorage As zLIB_ListStorage, ByVal sRepoUrl As String) As Boolean
-'
-'    Dim ArrayOfReposAlreadyAdded
-'
-'    If GitStorage.IsEmpty Then
-'        RepoHasAlreadyBeenAdded = False
-'    Else
-'        ArrayOfReposAlreadyAdded = GitStorage.ItemsInField("RepoUrl")
-'        Debug.Print WorksheetFunction.CountIfs(ArrayOfReposAlreadyAdded, 1)
-'    End If
-'
-'End Function
-'
+

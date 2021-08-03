@@ -1,5 +1,48 @@
 Consider renaming as PowerFunctions
 
+How about
+ - store repo URLs in target workbook
+ - On refresh
+    * Create lambda map sheet
+    * Loop repos
+    * import xml data into listobject 
+    * copy into ListStorage (may not be necessary as can set overwrite = false in the first step above)
+    * Add repoURL to the imported formula table (wont be able to do this with XML)
+    * Maybe later create a summary of changes including duplicate names not converted to lambdas
+
+
+
+How do I get a z_LibObject as a power query --> I may have to add functionality to code library
+ - Add a CreateFromPowerQuery option
+
+Add functionality to delete all repos
+
+Add functionality to replace repos with selection - needs to be a single column only
+
+Need to allow a single spreadsheet to source from multiple repos
+
+How to I handle cases if same formula name across multiple repos
+
+Build a check before XML export to ensure no duplicate formula names (this will only solve the issue in a single repo though)
+
+Create code to list repos in active spreadsheet
+
+How do I want to store the repo data in the target sheet (if at all?)
+ - maybe just the lambdas imported?
+ - how about creating teh query in the add in (which does not get saved)
+ - Lambda and associated metadata is stored in target workbook (can use additional hidden names to store additional metadata?  Alternative store on hidden sheet?) --> maybe a very hidden sheet will be cleaner?
+ - Active repos also need to be saved somewhere
+
+In AddGitRepo
+ - uncomment code that sets storage sheet to very hidden
+
+
+C:\Users\charl\Dropbox\Dropbox_Charl\Computer_Technical\Programming_GitHub\XL_PowerFunctionLibrary
+ - Add all formulas from LambdaWorkings into LambdaLibrary
+
+
+Create a generator file in XL_PowerFunctionLibrary  --> refer to the outdated ExcelLambdas for formulas
+
 VBA library Update isempty to be able to also refer to the filtered list?
 
 Instead of adding the Lambda repos to active workbook add them to the addin workbook so they can be imported into any workbook - how can they be identified and be refreshed?
