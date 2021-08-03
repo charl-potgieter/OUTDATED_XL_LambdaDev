@@ -1,14 +1,20 @@
 Consider renaming as PowerFunctions
 
 How about
- - store repo URLs in target workbook
+ - store repo URLs in target workbook - DONE
  - On refresh
-    * Create lambda map sheet
-    * Loop repos
-    * import xml data into listobject 
-    * copy into ListStorage (may not be necessary as can set overwrite = false in the first step above)
-    * Add repoURL to the imported formula table (wont be able to do this with XML)
-    * Maybe later create a summary of changes including duplicate names not converted to lambdas
+    * Create lambda map sheet - DONE
+    * Loop repos - DONE
+    * import xml data into listobject  - DONE
+    * Maybe later create a summary of changes including duplicate names not converted to lambdas  (update z_LibListObject to allow a copy to be made - which can be used for comparison purposes)
+    * Create a URL field in the listobject (not mapped to XML)
+    * Each time XML is imported populate empty fields in above URL field with the URL
+
+When creating the Lambda names
+ - maybe just keep the Lambda URL in the comment - this way I can track
+ - add a some sort of flag at start of comment to indicate this is an imported lambda name.  Maybe <PowerFormulaImport> <YYYMMMDD HHMMSS>
+ - all imported lambda names should be deleted before importing new ones
+ 
 
 
 
