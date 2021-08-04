@@ -1,31 +1,18 @@
 Consider renaming as PowerFunctions
 
-How about
- - store repo URLs in target workbook - DONE
- - On refresh
-    * Create lambda map sheet - DONE
-    * Loop repos - DONE
-    * import xml data into listobject  - DONE
-    * Maybe later create a summary of changes including duplicate names not converted to lambdas  (update z_LibListObject to allow a copy to be made - which can be used for comparison purposes)
-    * Create a URL field in the listobject (not mapped to XML)
-    * Each time XML is imported populate empty fields in above URL field with the URL
-
 When creating the Lambda names
  - maybe just keep the Lambda URL in the comment - this way I can track
  - add a some sort of flag at start of comment to indicate this is an imported lambda name.  Maybe <PowerFormulaImport> <YYYMMMDD HHMMSS>
  - all imported lambda names should be deleted before importing new ones
- 
+  - When adding lambda to names maybe get rid of the excess spaces and newlines in the formula? Will save space given only limteded functions are allowed.  Use Worksheetfunction.trim
 
+When formulas are refreshed in target --> create a summary of changes including duplicate names not converted to lambdas  (update z_LibListObject to allow a copy to be made - which can be used for comparison purposes)
 
-
-How do I get a z_LibObject as a power query --> I may have to add functionality to code library
- - Add a CreateFromPowerQuery option
+Create a check before creating lambda name to ensure that the (trimmed) formula does not exceed allowed length
 
 Add functionality to delete all repos
 
 Add functionality to replace repos with selection - needs to be a single column only
-
-Need to allow a single spreadsheet to source from multiple repos
 
 How to I handle cases if same formula name across multiple repos
 

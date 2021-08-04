@@ -1,44 +1,55 @@
 Attribute VB_Name = "m000_EntryPoints"
 Option Explicit
 
-Public Const csRepoStorageName = "GitRepos"
-Public Const csFunctionStorageName = "PowerFunctions"
-Const csLambdaXmlMapName As String = "LambdaMap"
+Public Const gcsLambdaXmlMapName As String = "LambdaMap"
 
+Public Type TypeLamdaData
+    Name As String
+    RefersTo As String
+    Category As String
+    Author As String
+    Comment As String
+    URL As String
+End Type
+    
 
 Public Sub CreateLambdaXmlGeneratorWorkbook()
 
-    Dim LambdaStorage As zLIB_ListStorage
-    Dim CategoryStorage As zLIB_ListStorage
+    Dim shtCategories As Worksheet
+    Dim shtLambdas As Worksheet
+    Dim loCategories As ListObject
+    Dim loLambdas As ListObject
     Dim wkb As Workbook
     Dim sht As Worksheet
     Dim LambdaXmlMap As XmlMap
-    Const csCategoryStorageName As String = "CategoryStorage"
-    Const csLambdaStorageName As String = "LambdaStorage"
-    
-    
-    
-    Set LambdaStorage = New zLIB_ListStorage
-    Set CategoryStorage = New zLIB_ListStorage
+
     
     StandardEntry
     Set wkb = Workbooks.Add
-    LambdaStorage.CreateStorage wkb, csLambdaStorageName, _
-        Array("Name", "RefersTo", "Category", "Author", "Comment")
-    CategoryStorage.CreateStorage wkb, csCategoryStorageName, Array("Categories")
     
-    'Delete sheets other than above storage
+    'Delete all sheets except 1
     For Each sht In wkb.Worksheets
-        If sht.Name <> csCategoryStorageName And sht.Name <> csLambdaStorageName Then
-            sht.Delete
-        End If
+        If sht.Index <> 1 Then sht.Delete
     Next sht
-
-    FormatLambdaStorageSheet LambdaStorage
-    FormatCategoryStorageSheet CategoryStorage
-    Set LambdaXmlMap = CreateLambdaXmlMap(wkb, csLambdaXmlMapName)
-    AssignXmlMapToStorage LambdaStorage, LambdaXmlMap
-
+    
+    Set shtCategories = wkb.Worksheets(1)
+    SetupGeneratorCategorySheet shtCategories, loCategories
+    FormatGeneratorListObject loCategories
+    Set shtLambdas = wkb.Sheets.Add(Before:=wkb.Sheets(1))
+    SetupGeneratorLambdaSheet shtLambdas, loLambdas
+    FormatGeneratorListObject loLambdas
+    
+    Set LambdaXmlMap = CreateLambdaXmlMap(wkb)
+    
+    'Assign XML map to Lambdas list object
+    With loLambdas
+        .ListColumns("Name").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/Name"
+        .ListColumns("RefersTo").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/RefersTo"
+        .ListColumns("Category").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/Category"
+        .ListColumns("Author").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/Author"
+        .ListColumns("Comment").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/Comment"
+    End With
+    
     wkb.Activate
     wkb.Sheets(1).Select
     ActiveWindow.WindowState = xlMaximized
@@ -50,13 +61,11 @@ End Sub
 
 Sub ExportLambaFunctionsFromActiveWorkbookToXml()
 
-    Dim shtLambdaInventory As Worksheet
-    Dim LambdaStorage As zLIB_ListStorage
     Dim sXmlFileExportPath As String
     Dim sHumanReadableInventoryFilePath As String
     Dim wkb As Workbook
     Dim sExportPath As String
-    Const csXmlMapName As String = "LambdaMap"
+    Dim loLambdas As ListObject
 
     StandardEntry
     Set wkb = ActiveWorkbook
@@ -68,12 +77,11 @@ Sub ExportLambaFunctionsFromActiveWorkbookToXml()
     sExportPath = wkb.Path & Application.PathSeparator & "PowerFunctionExports"
     If Not FolderExists(sExportPath) Then CreateFolder (sExportPath)
     sXmlFileExportPath = sExportPath & Application.PathSeparator & "LambdaFunctions.xml"
-    wkb.XmlMaps(csXmlMapName).Export Url:=sXmlFileExportPath, Overwrite:=True
+    wkb.XmlMaps(gcsLambdaXmlMapName).Export URL:=sXmlFileExportPath, Overwrite:=True
 
-    Set LambdaStorage = New zLIB_ListStorage
-    LambdaStorage.AssignStorage wkb, "LambdaStorage"
+    Set loLambdas = wkb.Sheets("Lambdas").ListObjects("tbl_Lambdas")
     sHumanReadableInventoryFilePath = sExportPath & Application.PathSeparator & "LambdaFunctions.txt"
-    WriteHumanReadableLambdaInventory LambdaStorage, sHumanReadableInventoryFilePath
+    WriteHumanReadableLambdaInventory loLambdas, sHumanReadableInventoryFilePath
 
     MsgBox ("Functions exported")
 
@@ -86,30 +94,20 @@ End Sub
 Sub AddGitRepoToActiveWorkbook()
 
     Dim sRepoUrl As String
-    Dim sRepoName As String
-    Dim GitRepoStorage As zLIB_ListStorage
-    Dim RepoUrlDictionary As Dictionary
-    Dim wkb As Workbook
+    Dim GitRepoStorage
 
-    Set wkb = ActiveWorkbook
+    
+    If ActiveWorkbook.Name = ThisWorkbook.Name Then Exit Sub
+    
     sRepoUrl = InputBox("Enter Repo URL")
     If sRepoUrl = "" Then Exit Sub
 
-    Set GitRepoStorage = New zLIB_ListStorage
+    Set GitRepoStorage = AssignGitRepoStorage
     
-
-    If Not (GitRepoStorage.StorageAlreadyExists(wkb, csRepoStorageName)) Then
-        GitRepoStorage.CreateStorage wkb, csRepoStorageName, Array("RepoUrl")
-    Else
-        GitRepoStorage.AssignStorage wkb, csRepoStorageName
-    End If
-
-    If RepoHasAlreadyBeenAdded(GitRepoStorage, sRepoUrl) Then
+    If RepoAlreadyExistsInStorage(sRepoUrl, GitRepoStorage) Then
         MsgBox ("This repo URL has previously been captured.  Current action ignored.")
     Else
-        Set RepoUrlDictionary = New Dictionary
-        RepoUrlDictionary.Add key:="RepoURL", item:=sRepoUrl
-        GitRepoStorage.InsertFromDictionary RepoUrlDictionary
+        AddRepoToStorage sRepoUrl, GitRepoStorage
         MsgBox ("Repo successfully added")
     End If
 
@@ -120,40 +118,29 @@ End Sub
 Sub RefreshAvailableFormulas()
 
     Dim wkb As Workbook
-    Dim FormulaStorage As zLIB_ListStorage
-    Dim GitRepoStorage As zLIB_ListStorage
-    Dim sRepoUrl As String
+    Dim LambdaStorage
+    Dim GitRepoStorage
+    Dim sRepoList() As String
     Dim LambdaXmlMap As XmlMap
-    Dim i As Integer
 
     StandardEntry
     Set wkb = ActiveWorkbook
+    If wkb.Name = ThisWorkbook.Name Then Exit Sub
 
-    Set GitRepoStorage = New zLIB_ListStorage
-    GitRepoStorage.AssignStorage wkb, "GitRepos"
-
-    Set FormulaStorage = New zLIB_ListStorage
-    If Not (FormulaStorage.StorageAlreadyExists(wkb, csFunctionStorageName)) Then
-        FormulaStorage.CreateStorage wkb, csFunctionStorageName, Array("Name", "RefersTo", "Category", "Author", "Comment")
-    Else
-        FormulaStorage.AssignStorage wkb, csFunctionStorageName
-    End If
-
-    On Error Resume Next
-    wkb.XmlMaps(csLambdaXmlMapName).Delete
-    On Error GoTo 0
-    Set LambdaXmlMap = CreateLambdaXmlMap(wkb, csLambdaXmlMapName)
-    AssignXmlMapToStorage FormulaStorage, LambdaXmlMap
     
-    FormulaStorage.ClearData
-    For i = 1 To GitRepoStorage.NumberOfRecords
-        sRepoUrl = GitRepoStorage.FieldItemByIndex("RepoUrl", i)
-        wkb.XmlMaps("LambdaMap").Import Url:=sRepoUrl, Overwrite:=False
-    Next i
-
-    wkb.XmlMaps(csLambdaXmlMapName).Delete
+    If Not GitRepoStorageExists Then
+        MsgBox ("There are no formula repos recorded in the active workbook")
+    Else
+        Set LambdaXmlMap = CreateLambdaXmlMap(wkb)
+        Set GitRepoStorage = AssignGitRepoStorage
+        Set LambdaStorage = AssignLambdaStorage
+        ReadRepoList sRepoList, GitRepoStorage
+        ImportDataIntoLambdaStorage sRepoList, LambdaStorage, LambdaXmlMap
+        wkb.XmlMaps(gcsLambdaXmlMapName).Delete
+    End If
+            
     StandardExit
-
+    
 End Sub
 
 
