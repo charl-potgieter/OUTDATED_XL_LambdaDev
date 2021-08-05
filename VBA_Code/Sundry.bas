@@ -273,7 +273,7 @@ Sub DeleteExistingLambdaFormulas(ByVal wkb As Workbook)
     Dim nm As Name
     
     For Each nm In ActiveWorkbook.Names
-        If Left(nm.Comment, 20) = "<PowerFormulaImport>" Then
+        If Left(nm.Comment, 20) = gcsCommentPrefix Then
             nm.Delete
         End If
     Next nm
@@ -282,5 +282,62 @@ End Sub
 
 
 
+        
+        
+Sub CreateLambdaFormulas(ByVal wkb As Workbook, ByRef LambdaFormulas() As TypeLamdaData)
+
+    Dim i As Integer
+    Dim CleanedName As String
+    Dim CleanedFormula As String
+    Dim nm As Name
+    
+    For i = LBound(LambdaFormulas) To UBound(LambdaFormulas)
+        
+        CleanedName = Replace( _
+            WorksheetFunction.Clean(WorksheetFunction.Trim(LambdaFormulas(i).Name)), _
+            " ", _
+            "")
+        CleanedFormula = WorksheetFunction.Clean(WorksheetFunction.Trim(LambdaFormulas(i).RefersTo))
+        
+        Set nm = wkb.Names.Add( _
+            Name:=CleanedName, _
+            RefersTo:=CleanedFormula)
+        nm.Comment = gcsCommentPrefix
+        
+    Next i
+
+End Sub
 
 
+Sub AddCategoriesToLambdaFunctionWizard(ByRef uf As uf_LambdaFunctionWizard, ByVal LambdaStorage)
+    
+    Dim LambdaCategories
+    Dim i As Integer
+    
+    ReadUniqueLambdaCategories LambdaStorage, LambdaCategories
+
+    uf.comboCategories.AddItem "All"
+    uf.comboCategories.ListIndex = 0
+    For i = LBound(LambdaCategories) To UBound(LambdaCategories)
+        uf.comboCategories.AddItem LambdaCategories(i)
+    Next i
+
+End Sub
+
+
+
+Sub AddFunctionsToWizardBasedOnSelectedCategory(ByRef uf As uf_LambdaFunctionWizard, ByRef LambdaStorage, _
+    SelectedCategory As String)
+    
+    Dim i As Integer
+    Dim LambdaNames
+    
+    
+    ReadLambdaNamesPerCategory LambdaStorage, LambdaNames, SelectedCategory
+    
+    For i = LBound(LambdaNames) To UBound(LambdaNames)
+        uf.lbFunctions.AddItem LambdaNames(i)
+    Next i
+    
+
+End Sub

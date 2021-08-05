@@ -118,7 +118,7 @@ Sub ImportDataIntoLambdaStorage(ByRef sRepoList() As String, ByVal LambdaStorage
     Dim wkb As Workbook
     Dim i As Integer
 
-    'Below is performed to enable intellisense that is not available for variant tpye parameter
+    'Below is performed to enable intellisense that is not available for variant type parameter
     Set Storage = LambdaStorage
     
     Set wkb = Storage.ListObj.Parent.Parent
@@ -145,8 +145,6 @@ Sub ImportDataIntoLambdaStorage(ByRef sRepoList() As String, ByVal LambdaStorage
         End If
     Next i
 
-    Storage.AddBlankRow
-
     With Storage.ListObj
         .ListColumns("Name").Range.ColumnWidth = 25
         .ListColumns("RefersTo").Range.ColumnWidth = 90
@@ -161,5 +159,60 @@ Sub ImportDataIntoLambdaStorage(ByRef sRepoList() As String, ByVal LambdaStorage
     End With
     
 
+End Sub
+
+
+
+Sub ReadLambdaFormulaDetails(ByVal LambdaStorage, ByRef LambdaFormulas() As TypeLamdaData)
+
+    Dim i As Integer
+    Dim Storage As zLIB_ListStorage
+    Dim NumberOfLambdas As Integer
+    
+    'Below is performed to enable intellisense that is not available for variant type parameter
+    Set Storage = LambdaStorage
+    
+    NumberOfLambdas = Storage.NumberOfRecords
+    ReDim LambdaFormulas(0 To NumberOfLambdas - 1)
+    
+    For i = 0 To NumberOfLambdas - 1
+        LambdaFormulas(i).Name = Storage.FieldItemByIndex("Name", i + 1)
+        LambdaFormulas(i).RefersTo = Storage.FieldItemByIndex("RefersTo", i + 1)
+        LambdaFormulas(i).Category = Storage.FieldItemByIndex("Category", i + 1)
+        LambdaFormulas(i).Author = Storage.FieldItemByIndex("Author", i + 1)
+        LambdaFormulas(i).Comment = Storage.FieldItemByIndex("Comment", i + 1)
+        LambdaFormulas(i).URL = Storage.FieldItemByIndex("Name", i + 1)
+        
+        
+    Next i
+
+End Sub
+
+
+
+Sub ReadLambdaNamesPerCategory(ByVal LambdaStorage, ByRef LambdaNames, ByVal Category As String)
+
+    Dim Storage As zLIB_ListStorage
+    Dim sFilterString As String
+    
+    Set Storage = LambdaStorage
+    If Category = "All" Then
+        LambdaNames = Storage.ItemsInField("Name")
+    Else
+        sFilterString = "[Category] = """ & Category & """"
+        Storage.Filter sFilterString
+        LambdaNames = Storage.ItemsInField(sFieldName:="Name", bFiltered:=True)
+    End If
+    
+End Sub
+
+
+Sub ReadUniqueLambdaCategories(ByVal LambdaStorage, ByRef LambdaCategories)
+
+    Dim Storage As zLIB_ListStorage
+    
+    Set Storage = LambdaStorage
+    LambdaCategories = Storage.ItemsInField(sFieldName:="Category", bUnique:=True)
+    
 End Sub
 

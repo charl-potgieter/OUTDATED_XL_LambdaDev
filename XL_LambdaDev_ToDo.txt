@@ -1,9 +1,15 @@
 Consider renaming as PowerFunctions
 
+When selecting Categories on useform
+ * Need to read lambda formula names
+ * Cannot easily pass variable to a userform change event
+ * See below link:
+    http://dailydoseofexcel.com/archives/2004/07/22/passing-arguments-to-a-userform/
+
 When creating the Lambda names
- - maybe just keep the Lambda URL in the comment - this way I can track
  - add a some sort of flag at start of comment to indicate this is an imported lambda name.  Maybe <PowerFormulaImport> <YYYMMMDD HHMMSS>
  - all imported lambda names should be deleted before importing new ones
+ - maybe keep the Lambda URL in the comment - this way I can track
   - When adding lambda to names maybe get rid of the excess spaces and newlines in the formula? Will save space given only limteded functions are allowed.  Use Worksheetfunction.trim
 
 When formulas are refreshed in target --> create a summary of changes including duplicate names not converted to lambdas  (update z_LibListObject to allow a copy to be made - which can be used for comparison purposes)

@@ -2,6 +2,7 @@ Attribute VB_Name = "m000_EntryPoints"
 Option Explicit
 
 Public Const gcsLambdaXmlMapName As String = "LambdaMap"
+Public Const gcsCommentPrefix = "<PowerFormulaImport>"
 
 Public Type TypeLamdaData
     Name As String
@@ -119,6 +120,7 @@ Sub RefreshAvailableFormulas()
 
     Dim wkb As Workbook
     Dim LambdaStorage
+    Dim LambdaFormulas() As TypeLamdaData
     Dim GitRepoStorage
     Dim sRepoList() As String
     Dim LambdaXmlMap As XmlMap
@@ -137,6 +139,9 @@ Sub RefreshAvailableFormulas()
         ReadRepoList sRepoList, GitRepoStorage
         ImportDataIntoLambdaStorage sRepoList, LambdaStorage, LambdaXmlMap
         wkb.XmlMaps(gcsLambdaXmlMapName).Delete
+        DeleteExistingLambdaFormulas wkb
+        ReadLambdaFormulaDetails LambdaStorage, LambdaFormulas
+        CreateLambdaFormulas wkb, LambdaFormulas
     End If
             
     StandardExit
@@ -144,4 +149,25 @@ Sub RefreshAvailableFormulas()
 End Sub
 
 
+
+Sub ShowLambdaUserForm()
+
+    Dim LambdaStorage
+    Dim uf As uf_LambdaFunctionWizard
+    Dim i As Integer
+    Dim LambdaNames
+    Dim LambdaCategories
+    
+    Set LambdaStorage = AssignLambdaStorage
+    Set uf = New uf_LambdaFunctionWizard
+    ReadUniqueLambdaCategories LambdaStorage, LambdaCategories
+    
+    AddCategoriesToLambdaFunctionWizard uf, LambdaStorage
+    AddFunctionsToWizardBasedOnSelectedCategory uf, LambdaStorage, "All"
+    
+    uf.Show
+    Unload uf
+    Set uf = Nothing
+
+End Sub
 
