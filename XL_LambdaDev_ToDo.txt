@@ -1,10 +1,11 @@
 Consider renaming as PowerFunctions
 
-When selecting Categories on useform
- * Need to read lambda formula names
- * Cannot easily pass variable to a userform change event
- * See below link:
-    http://dailydoseofexcel.com/archives/2004/07/22/passing-arguments-to-a-userform/
+How to parse variables from formula - regex?
+https://stackoverflow.com/questions/40832549/parse-a-string-in-excel-vba
+
+
+Need to work out how to manage potential forumula incosistencies that may arise between info stored in the ListObject and the name manager (see user manually changes)
+
 
 When creating the Lambda names
  - add a some sort of flag at start of comment to indicate this is an imported lambda name.  Maybe <PowerFormulaImport> <YYYMMMDD HHMMSS>

@@ -53,7 +53,8 @@ Sub SetupGeneratorLambdaSheet(ByRef sht As Worksheet, ByRef lo As ListObject)
     sht.Range("C5") = "RefersTo"
     sht.Range("D5") = "Category"
     sht.Range("E5") = "Author"
-    sht.Range("F5") = "Comment"
+    sht.Range("F5") = "Description"
+    sht.Range("G5") = "ParameterDescription"
     
     Set lo = sht.ListObjects.Add(xlSrcRange, _
         sht.Range("B5").CurrentRegion, , xlYes)
@@ -67,7 +68,8 @@ Sub SetupGeneratorLambdaSheet(ByRef sht As Worksheet, ByRef lo As ListObject)
         .ListColumns("RefersTo").Range.ColumnWidth = 90
         .ListColumns("Category").Range.ColumnWidth = 25
         .ListColumns("Author").Range.ColumnWidth = 25
-        .ListColumns("Comment").Range.ColumnWidth = 40
+        .ListColumns("Description").Range.ColumnWidth = 40
+        .ListColumns("ParameterDescription").Range.ColumnWidth = 70
         .DataBodyRange.HorizontalAlignment = xlLeft
         .DataBodyRange.VerticalAlignment = xlTop
         .DataBodyRange.WrapText = True
@@ -109,6 +111,19 @@ Sub SetupGeneratorLambdaSheet(ByRef sht As Worksheet, ByRef lo As ListObject)
         .Comment.Shape.Left = 500
         .Comment.Shape.Top = 10
         .Comment.Shape.Width = 200
+        .Comment.Shape.Height = 40
+    End With
+    
+    'Add Comment re ParameterDescription
+    With lo.ListColumns("ParameterDescription").Range.Cells(1)
+        .AddComment
+        .Comment.Visible = True
+        .Comment.Text Text:= _
+            "Enter as a pipe delimited string of name description pairs.  e.g." & _
+            "ParamaterName|Description|ParamaterName|Description"
+        .Comment.Shape.Left = 1200
+        .Comment.Shape.Top = 10
+        .Comment.Shape.Width = 300
         .Comment.Shape.Height = 40
     End With
     
@@ -184,10 +199,10 @@ Function CreateLambdaXmlMap(ByVal wkb As Workbook) As XmlMap
     'Excel needs two elements in map such a below in order to work out the schema
     sMap = "<LambdaDocument> " & vbCrLf & _
             " <Record> " & vbCrLf & _
-            "    <Name></Name><RefersTo></RefersTo><Category></Category><Author></Author><Comment></Comment> " & vbCrLf & _
+            "    <Name></Name><RefersTo></RefersTo><Category></Category><Author></Author><Description></Description><ParameterDescription></ParameterDescription> " & vbCrLf & _
             " </Record> " & vbCrLf & _
             " <Record> " & vbCrLf & _
-            "    <Name></Name><RefersTo></RefersTo><Comment></Comment> " & vbCrLf & _
+            "    <Name></Name><RefersTo></RefersTo><Category></Category><Author></Author><Description></Description><ParameterDescription></ParameterDescription> " & vbCrLf & _
             " </Record> " & vbCrLf & _
             "</LambdaDocument>"
 
@@ -203,17 +218,6 @@ Function CreateLambdaXmlMap(ByVal wkb As Workbook) As XmlMap
 End Function
 
 
-'Sub AssignXmlMapToListObj(ByVal lo As ListObject, ByVal LambdaXmlMap As XmlMap)
-'
-'    With lo
-'        .ListColumns("Name").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/Name"
-'        .ListColumns("RefersTo").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/RefersTo"
-'        .ListColumns("Category").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/Category"
-'        .ListColumns("Author").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/Author"
-'        .ListColumns("Comment").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/Comment"
-'    End With
-'
-'End Sub
 
 
 
@@ -255,7 +259,7 @@ Sub WriteHumanReadableLambdaInventory(ByRef loLambdas As ListObject, _
         oFile.WriteLine ("      Formula Name:   " & loLambdas.ListColumns("Name").DataBodyRange.Cells(i))
         oFile.WriteLine ("      Category:       " & loLambdas.ListColumns("Category").DataBodyRange.Cells(i))
         oFile.WriteLine ("      Autohor:        " & loLambdas.ListColumns("Author").DataBodyRange.Cells(i))
-        oFile.WriteLine ("      Comment:        " & loLambdas.ListColumns("Comment").DataBodyRange.Cells(i))
+        oFile.WriteLine ("      Description:        " & loLambdas.ListColumns("Description").DataBodyRange.Cells(i))
         oFile.WriteLine ("------------------------------------------------------------------------------------------------------------------/*")
         oFile.WriteLine (loLambdas.ListColumns("RefersTo").DataBodyRange.Cells(i))
         oFile.WriteLine (vbCrLf)
@@ -309,35 +313,4 @@ Sub CreateLambdaFormulas(ByVal wkb As Workbook, ByRef LambdaFormulas() As TypeLa
 End Sub
 
 
-Sub AddCategoriesToLambdaFunctionWizard(ByRef uf As uf_LambdaFunctionWizard, ByVal LambdaStorage)
-    
-    Dim LambdaCategories
-    Dim i As Integer
-    
-    ReadUniqueLambdaCategories LambdaStorage, LambdaCategories
 
-    uf.comboCategories.AddItem "All"
-    uf.comboCategories.ListIndex = 0
-    For i = LBound(LambdaCategories) To UBound(LambdaCategories)
-        uf.comboCategories.AddItem LambdaCategories(i)
-    Next i
-
-End Sub
-
-
-
-Sub AddFunctionsToWizardBasedOnSelectedCategory(ByRef uf As uf_LambdaFunctionWizard, ByRef LambdaStorage, _
-    SelectedCategory As String)
-    
-    Dim i As Integer
-    Dim LambdaNames
-    
-    
-    ReadLambdaNamesPerCategory LambdaStorage, LambdaNames, SelectedCategory
-    
-    For i = LBound(LambdaNames) To UBound(LambdaNames)
-        uf.lbFunctions.AddItem LambdaNames(i)
-    Next i
-    
-
-End Sub

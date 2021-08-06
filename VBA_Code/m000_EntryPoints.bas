@@ -9,7 +9,8 @@ Public Type TypeLamdaData
     RefersTo As String
     Category As String
     Author As String
-    Comment As String
+    Description As String
+    ParameterDescription As String
     URL As String
 End Type
     
@@ -48,7 +49,8 @@ Public Sub CreateLambdaXmlGeneratorWorkbook()
         .ListColumns("RefersTo").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/RefersTo"
         .ListColumns("Category").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/Category"
         .ListColumns("Author").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/Author"
-        .ListColumns("Comment").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/Comment"
+        .ListColumns("Description").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/Description"
+        .ListColumns("ParameterDescription").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/ParameterDescription"
     End With
     
     wkb.Activate
@@ -111,6 +113,8 @@ Sub AddGitRepoToActiveWorkbook()
         AddRepoToStorage sRepoUrl, GitRepoStorage
         MsgBox ("Repo successfully added")
     End If
+    
+    Set GitRepoStorage = Nothing
 
 End Sub
 
@@ -144,6 +148,8 @@ Sub RefreshAvailableFormulas()
         CreateLambdaFormulas wkb, LambdaFormulas
     End If
             
+    Set GitRepoStorage = Nothing
+    Set LambdaStorage = Nothing
     StandardExit
     
 End Sub
@@ -157,17 +163,21 @@ Sub ShowLambdaUserForm()
     Dim i As Integer
     Dim LambdaNames
     Dim LambdaCategories
-    
+        
+    StandardEntry
     Set LambdaStorage = AssignLambdaStorage
     Set uf = New uf_LambdaFunctionWizard
+    Set uf.LambdaStorage = LambdaStorage
     ReadUniqueLambdaCategories LambdaStorage, LambdaCategories
+    uf.LambdaCategories = LambdaCategories
     
-    AddCategoriesToLambdaFunctionWizard uf, LambdaStorage
-    AddFunctionsToWizardBasedOnSelectedCategory uf, LambdaStorage, "All"
+    
     
     uf.Show
     Unload uf
     Set uf = Nothing
+    Set LambdaStorage = Nothing
+    StandardExit
 
 End Sub
 

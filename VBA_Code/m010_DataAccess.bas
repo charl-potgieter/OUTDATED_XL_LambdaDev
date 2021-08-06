@@ -35,7 +35,7 @@ Function AssignLambdaStorage()
     
     
     If Not (LambdaStorage.StorageAlreadyExists(wkb, csLambdaStorageName)) Then
-        LambdaStorage.CreateStorage wkb, csLambdaStorageName, Array("Name", "RefersTo", "Category", "Author", "Comment", "URL")
+        LambdaStorage.CreateStorage wkb, csLambdaStorageName, Array("Name", "RefersTo", "Category", "Author", "Description", "URL")
     Else
         LambdaStorage.AssignStorage wkb, csLambdaStorageName
     End If
@@ -93,18 +93,18 @@ End Sub
 Sub ReadRepoList(ByRef sRepoList() As String, ByVal GitRepoStorage)
 
     Dim NumberOfRepos As Integer
-    Dim Storage As zLIB_ListStorage
+    Dim storage As zLIB_ListStorage
     Dim i As Integer
     
     'Below is performed to enable intellisense that is not available for variant tpye parameter
-    Set Storage = GitRepoStorage
+    Set storage = GitRepoStorage
     
-    NumberOfRepos = Storage.NumberOfRecords
+    NumberOfRepos = storage.NumberOfRecords
     
     ReDim sRepoList(0 To NumberOfRepos - 1)
 
     For i = 1 To NumberOfRepos
-        sRepoList(i - 1) = Storage.FieldItemByIndex("RepoUrl", i)
+        sRepoList(i - 1) = storage.FieldItemByIndex("RepoUrl", i)
     Next i
 
 End Sub
@@ -114,26 +114,26 @@ Sub ImportDataIntoLambdaStorage(ByRef sRepoList() As String, ByVal LambdaStorage
     ByVal LambdaXmlMap As XmlMap)
 
     Dim sRepoUrl As String
-    Dim Storage As zLIB_ListStorage
+    Dim storage As zLIB_ListStorage
     Dim wkb As Workbook
     Dim i As Integer
 
     'Below is performed to enable intellisense that is not available for variant type parameter
-    Set Storage = LambdaStorage
+    Set storage = LambdaStorage
     
-    Set wkb = Storage.ListObj.Parent.Parent
+    Set wkb = storage.ListObj.Parent.Parent
     
     'Assign XML map to storage list object
-    With Storage.ListObj
+    With storage.ListObj
         .ListColumns("Name").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/Name"
         .ListColumns("RefersTo").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/RefersTo"
         .ListColumns("Category").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/Category"
         .ListColumns("Author").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/Author"
-        .ListColumns("Comment").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/Comment"
+        .ListColumns("Description").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/Description"
     End With
 
 
-    Storage.ClearData
+    storage.ClearData
     For i = LBound(sRepoList) To UBound(sRepoList)
         sRepoUrl = sRepoList(i)
         wkb.XmlMaps(gcsLambdaXmlMapName).Import URL:=sRepoUrl, Overwrite:=False
@@ -145,12 +145,12 @@ Sub ImportDataIntoLambdaStorage(ByRef sRepoList() As String, ByVal LambdaStorage
         End If
     Next i
 
-    With Storage.ListObj
+    With storage.ListObj
         .ListColumns("Name").Range.ColumnWidth = 25
         .ListColumns("RefersTo").Range.ColumnWidth = 90
         .ListColumns("Category").Range.ColumnWidth = 25
         .ListColumns("Author").Range.ColumnWidth = 25
-        .ListColumns("Comment").Range.ColumnWidth = 40
+        .ListColumns("Description").Range.ColumnWidth = 40
         .ListColumns("URL").Range.ColumnWidth = 90
         .DataBodyRange.HorizontalAlignment = xlLeft
         .DataBodyRange.VerticalAlignment = xlTop
@@ -166,22 +166,22 @@ End Sub
 Sub ReadLambdaFormulaDetails(ByVal LambdaStorage, ByRef LambdaFormulas() As TypeLamdaData)
 
     Dim i As Integer
-    Dim Storage As zLIB_ListStorage
+    Dim storage As zLIB_ListStorage
     Dim NumberOfLambdas As Integer
     
     'Below is performed to enable intellisense that is not available for variant type parameter
-    Set Storage = LambdaStorage
+    Set storage = LambdaStorage
     
-    NumberOfLambdas = Storage.NumberOfRecords
+    NumberOfLambdas = storage.NumberOfRecords
     ReDim LambdaFormulas(0 To NumberOfLambdas - 1)
     
     For i = 0 To NumberOfLambdas - 1
-        LambdaFormulas(i).Name = Storage.FieldItemByIndex("Name", i + 1)
-        LambdaFormulas(i).RefersTo = Storage.FieldItemByIndex("RefersTo", i + 1)
-        LambdaFormulas(i).Category = Storage.FieldItemByIndex("Category", i + 1)
-        LambdaFormulas(i).Author = Storage.FieldItemByIndex("Author", i + 1)
-        LambdaFormulas(i).Comment = Storage.FieldItemByIndex("Comment", i + 1)
-        LambdaFormulas(i).URL = Storage.FieldItemByIndex("Name", i + 1)
+        LambdaFormulas(i).Name = storage.FieldItemByIndex("Name", i + 1)
+        LambdaFormulas(i).RefersTo = storage.FieldItemByIndex("RefersTo", i + 1)
+        LambdaFormulas(i).Category = storage.FieldItemByIndex("Category", i + 1)
+        LambdaFormulas(i).Author = storage.FieldItemByIndex("Author", i + 1)
+        LambdaFormulas(i).Description = storage.FieldItemByIndex("Description", i + 1)
+        LambdaFormulas(i).URL = storage.FieldItemByIndex("Name", i + 1)
         
         
     Next i
@@ -192,16 +192,16 @@ End Sub
 
 Sub ReadLambdaNamesPerCategory(ByVal LambdaStorage, ByRef LambdaNames, ByVal Category As String)
 
-    Dim Storage As zLIB_ListStorage
+    Dim storage As zLIB_ListStorage
     Dim sFilterString As String
     
-    Set Storage = LambdaStorage
+    Set storage = LambdaStorage
     If Category = "All" Then
-        LambdaNames = Storage.ItemsInField("Name")
+        LambdaNames = storage.ItemsInField("Name")
     Else
         sFilterString = "[Category] = """ & Category & """"
-        Storage.Filter sFilterString
-        LambdaNames = Storage.ItemsInField(sFieldName:="Name", bFiltered:=True)
+        storage.Filter sFilterString
+        LambdaNames = storage.ItemsInField(sFieldName:="Name", bFiltered:=True)
     End If
     
 End Sub
@@ -209,10 +209,10 @@ End Sub
 
 Sub ReadUniqueLambdaCategories(ByVal LambdaStorage, ByRef LambdaCategories)
 
-    Dim Storage As zLIB_ListStorage
+    Dim storage As zLIB_ListStorage
     
-    Set Storage = LambdaStorage
-    LambdaCategories = Storage.ItemsInField(sFieldName:="Category", bUnique:=True)
+    Set storage = LambdaStorage
+    LambdaCategories = storage.ItemsInField(sFieldName:="Category", bUnique:=True)
     
 End Sub
 
