@@ -65,6 +65,8 @@ Private Sub comboCategories_Change()
 End Sub
 
 
+
+
 Private Sub UserForm_Terminate()
    Set this.LambdaStorage = Nothing
 End Sub

@@ -35,7 +35,7 @@ Function AssignLambdaStorage()
     
     
     If Not (LambdaStorage.StorageAlreadyExists(wkb, csLambdaStorageName)) Then
-        LambdaStorage.CreateStorage wkb, csLambdaStorageName, Array("Name", "RefersTo", "Category", "Author", "Description", "URL")
+        LambdaStorage.CreateStorage wkb, csLambdaStorageName, Array("Name", "RefersTo", "Category", "Author", "Description", "ParameterDescription", "URL")
     Else
         LambdaStorage.AssignStorage wkb, csLambdaStorageName
     End If
@@ -130,6 +130,7 @@ Sub ImportDataIntoLambdaStorage(ByRef sRepoList() As String, ByVal LambdaStorage
         .ListColumns("Category").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/Category"
         .ListColumns("Author").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/Author"
         .ListColumns("Description").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/Description"
+        .ListColumns("ParameterDescription").XPath.SetValue LambdaXmlMap, "/LambdaDocument/Record/ParameterDescription"
     End With
 
 
@@ -163,27 +164,50 @@ End Sub
 
 
 
-Sub ReadLambdaFormulaDetails(ByVal LambdaStorage, ByRef LambdaFormulas() As TypeLamdaData)
+Sub ReadLambdaFormulaDetails(ByVal LambdaStorage, ByRef LambdaFormulas As Dictionary)
 
     Dim i As Integer
+    Dim j As Integer
     Dim storage As zLIB_ListStorage
     Dim NumberOfLambdas As Integer
+    Dim LambdaFormulaDetails As clsLambdaFormulaDetails
+    Dim ParameterAndDescriptions() As String
+    Dim ParamaterDescriptionPairString As String
+    Dim NumberOfParameters As Integer
+    Dim ParameterName As String
+    Dim ParameterDescription As String
     
     'Below is performed to enable intellisense that is not available for variant type parameter
     Set storage = LambdaStorage
     
     NumberOfLambdas = storage.NumberOfRecords
-    ReDim LambdaFormulas(0 To NumberOfLambdas - 1)
+    Set LambdaFormulas = New Dictionary
+    
+    
     
     For i = 0 To NumberOfLambdas - 1
-        LambdaFormulas(i).Name = storage.FieldItemByIndex("Name", i + 1)
-        LambdaFormulas(i).RefersTo = storage.FieldItemByIndex("RefersTo", i + 1)
-        LambdaFormulas(i).Category = storage.FieldItemByIndex("Category", i + 1)
-        LambdaFormulas(i).Author = storage.FieldItemByIndex("Author", i + 1)
-        LambdaFormulas(i).Description = storage.FieldItemByIndex("Description", i + 1)
-        LambdaFormulas(i).URL = storage.FieldItemByIndex("Name", i + 1)
+        Set LambdaFormulaDetails = New clsLambdaFormulaDetails
+        With LambdaFormulaDetails
+            .RefersTo = storage.FieldItemByIndex("RefersTo", i + 1)
+            .Category = storage.FieldItemByIndex("Category", i + 1)
+            .Author = storage.FieldItemByIndex("Author", i + 1)
+            .Description = storage.FieldItemByIndex("Description", i + 1)
+            .URL = storage.FieldItemByIndex("Name", i + 1)
         
-        
+            ParamaterDescriptionPairString = storage.FieldItemByIndex("ParameterDescription", i + 1)
+            NumberOfParameters = (Len(ParamaterDescriptionPairString) - _
+                Len(Replace(ParamaterDescriptionPairString, "|", "")) + 1) / 2
+            ReDim ParameterAndDescriptions(0 To NumberOfParameters * 2 - 1)
+            ParameterAndDescriptions = Split(storage.FieldItemByIndex("ParameterDescription", i + 1), "|")
+            Set .ParameterDescriptions = New Dictionary
+            For j = 0 To NumberOfParameters - 1
+                ParameterName = ParameterAndDescriptions(j * 2)
+                ParameterDescription = ParameterAndDescriptions((j * 2) + 1)
+                .ParameterDescriptions.Add ParameterName, ParameterDescription
+            Next j
+        End With
+        LambdaFormulas.Add storage.FieldItemByIndex("Name", i + 1), LambdaFormulaDetails
+        Set LambdaFormulaDetails = Nothing
     Next i
 
 End Sub

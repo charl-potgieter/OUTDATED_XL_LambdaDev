@@ -4,15 +4,6 @@ Option Explicit
 Public Const gcsLambdaXmlMapName As String = "LambdaMap"
 Public Const gcsCommentPrefix = "<PowerFormulaImport>"
 
-Public Type TypeLamdaData
-    Name As String
-    RefersTo As String
-    Category As String
-    Author As String
-    Description As String
-    ParameterDescription As String
-    URL As String
-End Type
     
 
 Public Sub CreateLambdaXmlGeneratorWorkbook()
@@ -124,7 +115,7 @@ Sub RefreshAvailableFormulas()
 
     Dim wkb As Workbook
     Dim LambdaStorage
-    Dim LambdaFormulas() As TypeLamdaData
+    Dim LambdaFormulas As Dictionary
     Dim GitRepoStorage
     Dim sRepoList() As String
     Dim LambdaXmlMap As XmlMap
@@ -133,7 +124,7 @@ Sub RefreshAvailableFormulas()
     Set wkb = ActiveWorkbook
     If wkb.Name = ThisWorkbook.Name Then Exit Sub
 
-    
+
     If Not GitRepoStorageExists Then
         MsgBox ("There are no formula repos recorded in the active workbook")
     Else
@@ -147,11 +138,11 @@ Sub RefreshAvailableFormulas()
         ReadLambdaFormulaDetails LambdaStorage, LambdaFormulas
         CreateLambdaFormulas wkb, LambdaFormulas
     End If
-            
+
     Set GitRepoStorage = Nothing
     Set LambdaStorage = Nothing
     StandardExit
-    
+
 End Sub
 
 
@@ -163,16 +154,18 @@ Sub ShowLambdaUserForm()
     Dim i As Integer
     Dim LambdaNames
     Dim LambdaCategories
-        
+    Dim LambdaFormulas As Dictionary
+
     StandardEntry
     Set LambdaStorage = AssignLambdaStorage
     Set uf = New uf_LambdaFunctionWizard
     Set uf.LambdaStorage = LambdaStorage
+
     ReadUniqueLambdaCategories LambdaStorage, LambdaCategories
+    ReadLambdaFormulaDetails LambdaStorage, LambdaFormulas
+
     uf.LambdaCategories = LambdaCategories
-    
-    
-    
+
     uf.Show
     Unload uf
     Set uf = Nothing
@@ -180,4 +173,6 @@ Sub ShowLambdaUserForm()
     StandardExit
 
 End Sub
+
+
 

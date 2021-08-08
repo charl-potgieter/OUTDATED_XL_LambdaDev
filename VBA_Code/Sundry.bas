@@ -275,7 +275,7 @@ End Sub
 Sub DeleteExistingLambdaFormulas(ByVal wkb As Workbook)
 
     Dim nm As Name
-    
+
     For Each nm In ActiveWorkbook.Names
         If Left(nm.Comment, 20) = gcsCommentPrefix Then
             nm.Delete
@@ -286,29 +286,27 @@ End Sub
 
 
 
-        
-        
-Sub CreateLambdaFormulas(ByVal wkb As Workbook, ByRef LambdaFormulas() As TypeLamdaData)
+Sub CreateLambdaFormulas(ByVal wkb As Workbook, ByRef LambdaFormulas As Dictionary)
 
-    Dim i As Integer
+    Dim FormulaName
     Dim CleanedName As String
     Dim CleanedFormula As String
     Dim nm As Name
-    
-    For i = LBound(LambdaFormulas) To UBound(LambdaFormulas)
-        
+
+    For Each FormulaName In LambdaFormulas.Keys
+
         CleanedName = Replace( _
-            WorksheetFunction.Clean(WorksheetFunction.Trim(LambdaFormulas(i).Name)), _
+            WorksheetFunction.Clean(WorksheetFunction.Trim(FormulaName)), _
             " ", _
             "")
-        CleanedFormula = WorksheetFunction.Clean(WorksheetFunction.Trim(LambdaFormulas(i).RefersTo))
-        
+        CleanedFormula = WorksheetFunction.Clean(WorksheetFunction.Trim(LambdaFormulas(FormulaName).RefersTo))
+
         Set nm = wkb.Names.Add( _
             Name:=CleanedName, _
             RefersTo:=CleanedFormula)
         nm.Comment = gcsCommentPrefix
-        
-    Next i
+
+    Next FormulaName
 
 End Sub
 

@@ -1,11 +1,32 @@
-Consider renaming as PowerFunctions
+Adopt below approach for passing lambda info to userform
+* pass Lambda storage as a property - currenty in place
+* dont pass additional details such as categories (currently in place, need to remove)
+* Create a method in the userform to uddate form based on Lambda storage:
+    * updates categories
+    * reads data into dictionary
 
-How to parse variables from formula - regex?
-https://stackoverflow.com/questions/40832549/parse-a-string-in-excel-vba
+
+
+Cannot add a custom type to a dictionary - looks like I will need to create a class
+https://stackoverflow.com/questions/9178177/how-to-put-user-defined-datatype-into-a-dictionary
+
+I am tempted to store TypeLambdaData as a dictionary rather than an array
+ - name will be the key hence that field can be removed from type
+ - being able to reference the required formula detail by name a lot more elegant than looping
+
+
+Work towards getting function and parameters displayed in formula wizard
+
+Ideally I should check that XML generator has parameter and description for each 
+parameter
+* May not be worth the effort
+* Difficult to parse commas within brackets and quotes in order to count parameters
+
 
 
 Need to work out how to manage potential forumula incosistencies that may arise between info stored in the ListObject and the name manager (see user manually changes)
 
+Consider renaming as PowerFunctions
 
 When creating the Lambda names
  - add a some sort of flag at start of comment to indicate this is an imported lambda name.  Maybe <PowerFormulaImport> <YYYMMMDD HHMMSS>
