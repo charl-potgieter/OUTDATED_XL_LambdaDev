@@ -24,7 +24,7 @@ parameter
 
 
 
-Need to work out how to manage potential forumula incosistencies that may arise between info stored in the ListObject and the name manager (see user manually changes)
+Need to work out how to manage potential forumula incosistencies that may arise between info stored in the ListObject and the name manager (say user manually changes)
 
 Consider renaming as PowerFunctions
 
